@@ -7,9 +7,11 @@ import AccountBanner from '../components/UI/AccountBanner';
 import { useSession, signOut } from 'next-auth/react';
 import useAddressbook from '../hooks/useAddressbook';
 import { useEffect, useState } from 'react';
+import useWeb3Modal from '/hooks/useWeb3Modal';
 export default function Home() {
   const [user, setUser] = useState({});
 
+  const { connect, address } = useWeb3Modal();
   const { data: session, status } = useSession({ required: true });
   const { addressbook } = useAddressbook(session.user.id);
 
