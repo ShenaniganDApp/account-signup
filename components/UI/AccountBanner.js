@@ -3,7 +3,7 @@ import Image from 'next/image';
 const AccountBanner = ({ children, src }) => {
 
   return (
-    <div className="flex flex-row justify-around items-center w-60">
+    <div className="flex flex-row justify-center items-center gap-2">
       <Image
         className="rounded-full"
         src={src}
