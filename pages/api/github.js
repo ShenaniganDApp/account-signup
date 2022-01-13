@@ -3,17 +3,13 @@ const FormData = require('form-data');
 
 export default async function handler(req, res) {
   const { code } = await JSON.parse(req.body);
-  console.log('code: ', code);
 
   const data = new FormData();
 
   data.append('client_id', process.env.GITHUB_CLIENT_ID);
   data.append('client_secret', process.env.GITHUB_CLIENT_SECRET);
   data.append('code', code);
-  console.log('b');
   data.append('redirect_uri', process.env.NEXTAUTH_URL + '/api/github');
-
-  console.log('data: ', data);
 
   // Request to exchange code for an access token
   fetch(`https://github.com/login/oauth/access_token`, {

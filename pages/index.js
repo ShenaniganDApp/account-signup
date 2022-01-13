@@ -15,8 +15,9 @@ export default function Home() {
   const [addBookEntry, setAddBookEntry] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [githubUsername, setGithubUsername] = useState('');
+  const [signature, setSignature] = useState('');
 
-  const { connect, address } = useWeb3Modal();
+  const { connect, address, web3Provider } = useWeb3Modal();
   const { data: session, status } = useSession({ required: true });
   const { addressbook } = useAddressbook(session.user.id);
 
@@ -72,6 +73,14 @@ export default function Home() {
     });
   }, [session, addressbook]);
 
+  //use web3Provider to sign a message that will confirm the user owns the address
+  const signMessage = async () => {
+    const signer = web3Provider.getSigner();
+    const message = `I own this address: ${address}`;
+    const signature = await signer.signMessage(message);
+    setSignature(signature);
+  };
+
   return (
     <div className={styles.container}>
       <CornerTriangle origin="origin-top-right" corner={'top-0 left-0'} />
@@ -85,7 +94,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={`${styles.main} bg-white`} >
+      <main className={`${styles.main} bg-white`}>
         <div className="absolute top-10 flex row justify-around items-center w-60	">
           <Image
             className=" rounded-full"
@@ -120,24 +129,35 @@ export default function Home() {
               </div>
 
               <div className="w-1/2 flex flex-col gap-5 flex-row justify-center items-center">
-                {address && address != addBookEntry.address ? (
-                  `New Address: ${formatAddress(address)}`
-                ) : (
+                <div className="flex justify-center w-60 p-2">
                   <button
-                    className="h-12 px-3.5 text-white p-2 text-xl  bg-cornflowerblue rounded shadow"
-                    onClick={connect}
+                    className=" w-[calc(100%-10px)] h-12 px-3.5 text-white p-2 text-xl  bg-cornflowerblue rounded shadow"
+                    onClick={address ? signMessage : connect}
                   >
-                    Link Ethereum to SHE
+                    {signature
+                      ? `✅ ${formatAddress(address)}`
+                      : address
+                      ? `Link ${formatAddress(address)}`
+                      : 'Connect Ethereum'}
                   </button>
-                )}
+                </div>
+
                 <div className="w-60 p-2">
                   {githubUsername ? (
-                    <GithubLoginButton className="m-0" text={githubUsername} />
+                    <GithubLoginButton
+                      className="m-0"
+                      text={`${githubUsername}`}
+                      align="center"
+                    />
                   ) : (
                     <a
                       href={`https://github.com/login/oauth/authorize?scope=user&client_id=${process.env.GITHUB_CLIENT_ID}`}
                     >
-                      <GithubLoginButton className="m-0" text="Link Github to SHE" />
+                      <GithubLoginButton
+                        className="m-0 text-center"
+                        text="Link Github"
+                        align="center"
+                      />
                     </a>
                   )}
                 </div>
