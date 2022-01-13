@@ -13,10 +13,11 @@ import { writeAddressbook } from '/helpers/github';
 
 export default function Home() {
   const [addBookEntry, setAddBookEntry] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [githubUsername, setGithubUsername] = useState('');
 
   const { connect, address } = useWeb3Modal();
   const { data: session, status } = useSession({ required: true });
-  console.log('session: ', session);
   const { addressbook } = useAddressbook(session.user.id);
 
   const onSubmit = async (ethAddress, githubUsername) => {
@@ -29,12 +30,39 @@ export default function Home() {
     ? '✅ BrightID is Connected'
     : '❌ Go back to Discord and connect BrightID';
 
-  // useEffect(() => {
-  //   async function fetchData() {
-    
-  //   }
-  //   fetchData();
-  // }, [session]);
+  useEffect(() => {
+    const fetchGithub = async () => {
+      const url = window.location.href;
+      const hasCode = url.includes('?code=');
+
+      // If Github API returns the code parameter
+      if (hasCode) {
+        setIsLoading(true);
+        const newUrl = url.split('?code=');
+
+        const requestData = {
+          code: newUrl[1],
+        };
+
+        const proxy_url = process.env.NEXTAUTH_URL + '/api/github';
+
+        // Use code parameter and other parameters to make POST request to proxy_server
+        try {
+          const response = await fetch(proxy_url, {
+            method: 'POST',
+            body: JSON.stringify(requestData),
+          });
+          const { login } = await response.json();
+
+          setGithubUsername(login);
+          setIsLoading(false);
+        } catch (error) {
+          setIsLoading(false);
+        }
+      }
+    };
+    fetchGithub();
+  }, []);
 
   useEffect(() => {
     addressbook.find((addBookEntry) => {
@@ -57,7 +85,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={`${styles.main} bg-white`}>
+      <main className={`${styles.main} bg-white`} >
         <div className="absolute top-10 flex row justify-around items-center w-60	">
           <Image
             className=" rounded-full"
@@ -96,14 +124,22 @@ export default function Home() {
                   `New Address: ${formatAddress(address)}`
                 ) : (
                   <button
-                    className="w-60 text-white p-2 text-xl font-bold bg-cornflowerblue rounded"
+                    className="h-12 px-3.5 text-white p-2 text-xl  bg-cornflowerblue rounded shadow"
                     onClick={connect}
                   >
                     Link Ethereum to SHE
                   </button>
                 )}
                 <div className="w-60 p-2">
-                  <GithubLoginButton text="Link Github to SHE" />
+                  {githubUsername ? (
+                    <GithubLoginButton className="m-0" text={githubUsername} />
+                  ) : (
+                    <a
+                      href={`https://github.com/login/oauth/authorize?scope=user&client_id=${process.env.GITHUB_CLIENT_ID}`}
+                    >
+                      <GithubLoginButton className="m-0" text="Link Github to SHE" />
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
