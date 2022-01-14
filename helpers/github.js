@@ -11,9 +11,10 @@ const GITHUB_ADDRESS_FILE_PATH =
 
 export function writeAddressbook(newEntry, currentEntry) {
   try {
+    const name = newEntry.name;
     const discordId = newEntry.id;
     const address = newEntry.address;
-    const github = newEntry.github;
+    const github = '@' + newEntry.githubUsername;
     let userExists = null;
     fetch(`${GITHUB_API_URL}/repos/${GITHUB_ADDRESS_FILE_PATH}`, {
       method: 'GET',
@@ -23,7 +24,6 @@ export function writeAddressbook(newEntry, currentEntry) {
     })
       .then((res) => res.json())
       .then((body) => {
-        console.log('body: ', body);
         const encodedContent = body.content;
         const fileSha = body.sha;
         console.log(`fetched file with sha ${fileSha} for user ${name}`);
@@ -32,13 +32,16 @@ export function writeAddressbook(newEntry, currentEntry) {
         const decodedContent = decodeData(encodedContent); // Manipulated the decoded content:
         // First, check if the user already exists.
         if (!!currentEntry) {
-          const index = decodedContent.indexOf(currentEntry);
-          if (currentEntry.address !== address) {
+          const index = decodedContent.findIndex(
+            (e) => e.address === currentEntry.address
+          );
+
+          if (address && currentEntry.address !== address) {
             decodedContent[index].address = address;
           } else {
             console.log('address already there');
           }
-          if (currentEntry.github !== github) {
+          if (github && currentEntry.github !== github) {
             decodedContent[index].github = github;
           } else {
             console.log('github already there');
@@ -57,6 +60,7 @@ export function writeAddressbook(newEntry, currentEntry) {
 
         // We encode the updated content to base64.
         const updatedContent = encodeData(decodedContent);
+
         // We prepare the body to be sent to the API.
         const marshalledBody = marshallFileUpdate({
           message: 'Update addressbook.json',
@@ -74,6 +78,7 @@ export function writeAddressbook(newEntry, currentEntry) {
           console.log('Updated file on GitHub successfully.');
         });
       });
+    return { name, address, github };
   } catch (err) {
     console.log(error);
   }
