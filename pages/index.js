@@ -123,8 +123,26 @@ export default function Home() {
             width={75}
             height={75}
           />
+
           <p className="text-2xl w-80 text-center">{brightIDMessage}</p>
         </div>
+        {!session.hasBrightId && (
+          <div className="flex flex-col justify-center items-center ">
+            <p className="text-large">
+              You Must Link Your BrightID account via the Discord Bot
+            </p>
+            <a
+              href="https://discord.gg/JTctQhENDe"
+              target={'_blank'}
+              rel="noreferrer"
+            >
+              <button className="shadow-md m-20 w-60 text-white p-2 text-xl font-bold bg-discord rounded">
+                Back to Discord
+              </button>
+            </a>
+          </div>
+        )}
+
         {session.hasBrightId && (
           <>
             <div className="w-full flex flex-row justify-center items-center">
