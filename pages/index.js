@@ -15,16 +15,27 @@ export default function Home() {
   const [addBookEntry, setAddBookEntry] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [githubUsername, setGithubUsername] = useState('');
+  const [updateSuccessfull, setUpdateSuccessful] = useState(false);
   const [signature, setSignature] = useState('');
 
   const { connect, address, web3Provider } = useWeb3Modal();
   const { data: session, status } = useSession({ required: true });
   const { addressbook } = useAddressbook(session.user.id);
 
-  const onSubmit = async (ethAddress, githubUsername) => {
+  const canSubmit = (address && signature) || githubUsername;
+
+  const onSubmit = async (e) => {
     e.preventDefault();
-    const newEntry = { discordId: session.user.id, address, githubUsername };
-    writeAddressbook(newEntry, addBookEntry);
+    const newEntry = {
+      name: session.user.name,
+      discordId: session.user.id,
+      address,
+      githubUsername,
+    };
+    const { address, github } = writeAddressbook(newEntry, addBookEntry);
+    address && setAddBookEntry({ ...addBookEntry, address });
+    github && setAddBookEntry({ ...addBookEntry, github });
+    setUpdateSuccessful(true);
   };
 
   const brightIDMessage = session.hasBrightId
@@ -118,30 +129,17 @@ export default function Home() {
           <>
             <div className="w-full flex flex-row justify-center items-center">
               <div className="w-1/2 flex flex-col gap-5 justify-center items-start ml-10">
+                <AccountBanner src={'/assets/github.png'}>
+                  {addBookEntry.github ? addBookEntry.github : '❌ Not Linked'}
+                </AccountBanner>
                 <AccountBanner src={'/assets/ethereum.png'}>
                   {addBookEntry.address
                     ? `${formatAddress(addBookEntry.address)}`
                     : '❌ Not Linked'}
                 </AccountBanner>
-                <AccountBanner src={'/assets/github.png'}>
-                  {addBookEntry.github ? addBookEntry.github : '❌ Not Linked'}
-                </AccountBanner>
               </div>
 
               <div className="w-1/2 flex flex-col gap-5 flex-row justify-center items-center">
-                <div className="flex justify-center w-60 p-2">
-                  <button
-                    className=" w-[calc(100%-10px)] h-12 px-3.5 text-white p-2 text-xl  bg-cornflowerblue rounded shadow"
-                    onClick={address ? signMessage : connect}
-                  >
-                    {signature
-                      ? `✅ ${formatAddress(address)}`
-                      : address
-                      ? `Link ${formatAddress(address)}`
-                      : 'Connect Ethereum'}
-                  </button>
-                </div>
-
                 <div className="w-60 p-2">
                   {githubUsername ? (
                     <GithubLoginButton
@@ -161,11 +159,31 @@ export default function Home() {
                     </a>
                   )}
                 </div>
+                <div className="flex justify-center w-60 p-2">
+                  <button
+                    className=" w-[calc(100%-10px)] h-12 px-3.5 text-white p-2 text-xl  bg-cornflowerblue rounded shadow-md"
+                    onClick={address ? signMessage : connect}
+                  >
+                    {signature
+                      ? `✅ ${formatAddress(address)}`
+                      : address
+                      ? `Link ${formatAddress(address)}`
+                      : 'Connect Ethereum'}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <button className="absolute bottom-10 w-60 text-white p-2 text-xl font-bold bg-she-pink rounded">
-              {!!addBookEntry ? 'Update Account' : 'Sign Up'}
+            <button
+              className={`shadow-md disabled:bg-slate-200 absolute bottom-10 w-60 text-white p-2 text-xl font-bold bg-she-pink rounded`}
+              disabled={!canSubmit}
+              onClick={onSubmit}
+            >
+              {updateSuccessfull
+                ? '✅'
+                : !!addBookEntry
+                ? 'Update Account'
+                : 'Sign Up'}
             </button>
 
             <a
