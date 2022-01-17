@@ -3,11 +3,21 @@ import Image from 'next/image';
 import styles from '../styles/Home.module.css';
 import { GithubLoginButton } from 'react-social-login-buttons';
 import CornerTriangle from '../components/UI/CornerTriangle';
+import AccountBanner from '../components/UI/AccountBanner';
 import { useSession, signOut } from 'next-auth/react';
-
+import useAddressbook from '../hooks/useAddressbook';
+import { useEffect, useState } from 'react';
 export default function Home() {
+  const [user, setUser] = useState({});
+
   const { data: session, status } = useSession({ required: true });
-  console.log('session: ', session);
+  const { addressbook } = useAddressbook(session.user.id);
+
+  useEffect(() => {
+    addressbook.find((user) => {
+      session.user.id === user.discordId ? setUser(user) : null;
+    });
+  }, [session, addressbook]);
   return (
     <div className={styles.container}>
       <CornerTriangle origin="origin-top-right" corner={'top-0 left-0'} />
@@ -18,8 +28,8 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={`${styles.main}`}>
-        <div className='flex row justify-around items-center w-60 	'>
+      <main className={`${styles.main} bg-white`}>
+        <div className="flex row justify-around items-center w-60	">
           <Image
             className=" rounded-full"
             src={session.user.image}
@@ -28,24 +38,30 @@ export default function Home() {
           />
           <h1 className="text-3xl">{session.user.name}</h1>
         </div>
-        <div className="md">
-          <GithubLoginButton />
-        </div>
-        <button onClick={() => signOut()}>End Session</button>
-      </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
+        <div className="w-full flex flex-row justify-center">
+          <AccountBanner src={'/assets/ethereum.png'}>
+            {user.address
+              ? `${user.address.slice(0, 5)}...${user.address.slice(-4)}`
+              : 'No Ethereum Address'}
+          </AccountBanner>
+          <div>
+            <AccountBanner src={'/assets/github.png'}>
+              {user.github ? user.github : 'No Github Username'}
+            </AccountBanner>
+
+            <GithubLoginButton />
+          </div>
+        </div>
+
+        <button>{!!user ? 'Update Account' : 'Sign Up'}</button>
+        <a href="https://she.energy" target="_blank" rel="noopener noreferrer">
+          Powered by SHE
+          {/* <span className={styles.logo}>
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
+          </span> */}
         </a>
-      </footer>
+      </main>
     </div>
   );
 }
