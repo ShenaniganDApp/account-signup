@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 
 const useAddressbook = ({ discordId }) => {
   const [addressbook, setAddressbook] = useState([]);
-  const [user, setUser] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -14,9 +13,7 @@ const useAddressbook = ({ discordId }) => {
         'https://raw.githubusercontent.com/ShenaniganDApp/scoreboard/master/data/addressbook.json'
       );
       const json = await response.json();
-      json.find((user) => {
-        discordId === user.discordId ? setUser(user) : null;
-      });
+
       setAddressbook(json);
       setIsLoading(false);
     };
