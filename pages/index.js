@@ -4,6 +4,7 @@ import styles from '/styles/Home.module.css';
 import { GithubLoginButton } from 'react-social-login-buttons';
 import CornerTriangle from '/components/UI/CornerTriangle';
 import AccountBanner from '/components/UI/AccountBanner';
+import { MobileWarning } from '/components/UI/MobileWarning';
 import { useSession, signOut } from 'next-auth/react';
 import useAddressbook from '/hooks/useAddressbook';
 import { useEffect, useState } from 'react';
@@ -21,6 +22,9 @@ export default function Home() {
   const { connect, address, web3Provider } = useWeb3Modal();
   const { data: session, status } = useSession({ required: true });
   const { addressbook } = useAddressbook(session.user.id);
+
+  //check if screen width is less than 550px
+  const isMobile = window.innerWidth < 550;
 
   const canSubmit = (address && signature) || githubUsername;
 
@@ -91,6 +95,8 @@ export default function Home() {
     const signature = await signer.signMessage(message);
     setSignature(signature);
   };
+
+  if (isMobile) return <MobileWarning />;
 
   return (
     <div className={styles.container}>
