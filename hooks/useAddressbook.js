@@ -21,7 +21,7 @@ const useAddressbook = ({ discordId }) => {
     fetchAddressbook();
   }, [discordId]);
 
-  return { addressbook, user, isLoading };
+  return { addressbook, isLoading };
 };
 
 export default useAddressbook;
