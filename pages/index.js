@@ -7,15 +7,28 @@ import AccountBanner from '../components/UI/AccountBanner';
 import { useSession, signOut } from 'next-auth/react';
 import useAddressbook from '../hooks/useAddressbook';
 import { useEffect, useState } from 'react';
+import useWeb3Modal from '/hooks/useWeb3Modal';
+import { formatAddress } from '../helpers/utils';
+import { writeAddressbook } from '../helpers/github';
+
 export default function Home() {
   const [user, setUser] = useState({});
 
+  const { connect, address } = useWeb3Modal();
   const { data: session, status } = useSession({ required: true });
   const { addressbook } = useAddressbook(session.user.id);
 
+  const onSubmit = async (ethAddress, githubUsername) => {
+    e.preventDefault();
+    const newEntry = { discordId: session.user.id, address, githubUsername };
+    writeAddressbook(newEntry, addBookEntry);
+  };
+
   useEffect(() => {
-    addressbook.find((user) => {
-      session.user.id === user.discordId ? setUser(user) : null;
+    addressbook.find((addBookEntry) => {
+      session.user.id === addBookEntry.discordId
+        ? setAddBookEntry(addBookEntry)
+        : null;
     });
   }, [session, addressbook]);
   return (
@@ -39,22 +52,41 @@ export default function Home() {
           <h1 className="text-3xl">{session.user.name}</h1>
         </div>
 
-        <div className="w-full flex flex-row justify-center">
+        <div className="w-full flex flex-row justify-center items-center">
+          <div className="w-1/2 flex flex-col gap-5 justify-center items-start ml-10">
           <AccountBanner src={'/assets/ethereum.png'}>
-            {user.address
-              ? `${user.address.slice(0, 5)}...${user.address.slice(-4)}`
+              {addBookEntry.address
+                ? `${formatAddress(addBookEntry.address)}`
               : 'No Ethereum Address'}
           </AccountBanner>
-          <div>
             <AccountBanner src={'/assets/github.png'}>
-              {user.github ? user.github : 'No Github Username'}
+              {addBookEntry.github
+                ? addBookEntry.github
+                : 'Github Has Not Been Linked'}
             </AccountBanner>
+          </div>
 
-            <GithubLoginButton />
+          <div className="w-1/2 flex flex-col gap-5 flex-row justify-center items-center">
+            {address && address != addBookEntry.address ? (
+              `New Address: ${formatAddress(address)}`
+            ) : (
+              <button
+                className="w-60 text-white p-2 text-xl font-bold bg-cornflowerblue rounded"
+                onClick={connect}
+              >
+                Link Ethereum to SHE
+              </button>
+            )}
+            <div className="w-60 p-2">
+              <GithubLoginButton text="Link Github to SHE" />
+            </div>
           </div>
         </div>
 
-        <button>{!!user ? 'Update Account' : 'Sign Up'}</button>
+        <button className="absolute bottom-10 w-60 text-white p-2 text-xl font-bold bg-she-pink rounded">
+          {!!addBookEntry ? 'Update Account' : 'Sign Up'}
+        </button>
+
         <a href="https://she.energy" target="_blank" rel="noopener noreferrer">
           Powered by SHE
           {/* <span className={styles.logo}>
