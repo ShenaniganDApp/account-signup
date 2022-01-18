@@ -22,7 +22,7 @@ export default function Home() {
 
   const { connect, address, web3Provider } = useWeb3Modal();
   const { data: session, status } = useSession({ required: true });
-  const { addressbook } = useAddressbook(session.user.id);
+  const { addressbook } = useAddressbook();
 
   //check if screen width is less than 550px
   const isMobile = window.innerWidth < 550;
@@ -41,6 +41,7 @@ export default function Home() {
       newEntry,
       addBookEntry
     );
+    console.log('newAddress: ', newAddress);
     newAddress && setAddBookEntry({ ...addBookEntry, address: newAddress });
     github && setAddBookEntry({ ...addBookEntry, github });
     setUpdateSuccessful(true);
