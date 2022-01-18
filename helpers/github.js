@@ -49,7 +49,7 @@ export function writeAddressbook(newEntry, currentEntry) {
             console.log('address already there');
           }
           if (github && currentEntry.github !== github) {
-            decodedContent[index].github = '@' + github;
+            decodedContent[index].github = github;
           } else {
             console.log('github already there');
           }
@@ -85,7 +85,7 @@ export function writeAddressbook(newEntry, currentEntry) {
           console.log('Updated file on GitHub successfully.');
         });
       });
-    return { name, address, github: '@' + github };
+    return { name, address, github };
   } catch (err) {
     console.log(error);
   }

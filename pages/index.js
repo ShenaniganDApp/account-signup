@@ -74,7 +74,7 @@ export default function Home() {
           });
           const { login } = await response.json();
 
-          setGithubUsername(login);
+          login && setGithubUsername('@' + login);
           setIsLoading(false);
         } catch (error) {
           setIsLoading(false);
@@ -197,7 +197,7 @@ export default function Home() {
                     {signature
                       ? `✅ ${formatAddress(signedAddress)}`
                       : address
-                      ? `Link ${formatAddress(signedAddress)}`
+                      ? `Link ${formatAddress(address)}`
                       : 'Connect Ethereum'}
                   </button>
                 </div>
