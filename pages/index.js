@@ -18,6 +18,7 @@ export default function Home() {
   const [githubUsername, setGithubUsername] = useState('');
   const [updateSuccessfull, setUpdateSuccessful] = useState(false);
   const [signature, setSignature] = useState('');
+  const [signedAddress, setSignedAddress] = useState('');
 
   const { connect, address, web3Provider } = useWeb3Modal();
   const { data: session, status } = useSession({ required: true });
@@ -26,18 +27,21 @@ export default function Home() {
   //check if screen width is less than 550px
   const isMobile = window.innerWidth < 550;
 
-  const canSubmit = (address && signature) || githubUsername;
+  const canSubmit = (signedAddress && signature) || githubUsername;
 
   const onSubmit = async (e) => {
     e.preventDefault();
     const newEntry = {
       name: session.user.name,
       discordId: session.user.id,
-      address,
+      address: signedAddress,
       githubUsername,
     };
-    const { address, github } = writeAddressbook(newEntry, addBookEntry);
-    address && setAddBookEntry({ ...addBookEntry, address });
+    const { address: newAddress, github } = writeAddressbook(
+      newEntry,
+      addBookEntry
+    );
+    newAddress && setAddBookEntry({ ...addBookEntry, address: newAddress });
     github && setAddBookEntry({ ...addBookEntry, github });
     setUpdateSuccessful(true);
   };
@@ -93,6 +97,8 @@ export default function Home() {
     const signer = web3Provider.getSigner();
     const message = `I own this address: ${address}`;
     const signature = await signer.signMessage(message);
+    const signerAddress = await signer.getAddress();
+    setSignedAddress(signerAddress);
     setSignature(signature);
   };
 
@@ -189,9 +195,9 @@ export default function Home() {
                     onClick={address ? signMessage : connect}
                   >
                     {signature
-                      ? `✅ ${formatAddress(address)}`
+                      ? `✅ ${formatAddress(signedAddress)}`
                       : address
-                      ? `Link ${formatAddress(address)}`
+                      ? `Link ${formatAddress(signedAddress)}`
                       : 'Connect Ethereum'}
                   </button>
                 </div>

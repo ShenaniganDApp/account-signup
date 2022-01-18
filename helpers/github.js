@@ -14,8 +14,8 @@ export function writeAddressbook(newEntry, currentEntry) {
     const name = newEntry.name;
     const discordId = newEntry.id;
     const address = newEntry.address;
-    const github = '@' + newEntry.githubUsername;
-    let userExists = null;
+    const github = newEntry.githubUsername;
+
     fetch(`${GITHUB_API_URL}/repos/${GITHUB_ADDRESS_FILE_PATH}`, {
       method: 'GET',
       headers: {
@@ -35,6 +35,13 @@ export function writeAddressbook(newEntry, currentEntry) {
           const index = decodedContent.findIndex(
             (e) => e.address === currentEntry.address
           );
+          if (
+            currentEntry.address === address &&
+            currentEntry.github === github
+          ) {
+            console.log(`User ${name} already exists in the addressbook.`);
+            return { name, address, github };
+          }
 
           if (address && currentEntry.address !== address) {
             decodedContent[index].address = address;
@@ -42,7 +49,7 @@ export function writeAddressbook(newEntry, currentEntry) {
             console.log('address already there');
           }
           if (github && currentEntry.github !== github) {
-            decodedContent[index].github = github;
+            decodedContent[index].github = '@' + github;
           } else {
             console.log('github already there');
           }
@@ -53,7 +60,7 @@ export function writeAddressbook(newEntry, currentEntry) {
             name,
             address,
             discordId,
-            github,
+            github: '@' + github,
           });
           decodedContent.push(addressEntry);
         }
@@ -78,7 +85,7 @@ export function writeAddressbook(newEntry, currentEntry) {
           console.log('Updated file on GitHub successfully.');
         });
       });
-    return { name, address, github };
+    return { name, address, github: '@' + github };
   } catch (err) {
     console.log(error);
   }
