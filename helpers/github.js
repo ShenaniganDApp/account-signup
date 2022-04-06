@@ -12,7 +12,7 @@ const GITHUB_ADDRESS_FILE_PATH =
 export function writeAddressbook(newEntry, currentEntry) {
   try {
     const name = newEntry.name;
-    const discordId = newEntry.id;
+    const discordId = newEntry.discordId;
     const address = newEntry.address;
     const github = newEntry.githubUsername;
 
@@ -31,9 +31,9 @@ export function writeAddressbook(newEntry, currentEntry) {
         // it's returned as a base64 string.
         const decodedContent = decodeData(encodedContent); // Manipulated the decoded content:
         // First, check if the user already exists.
-        if (!!currentEntry) {
+        if (currentEntry) {
           const index = decodedContent.findIndex(
-            (e) => e.address === currentEntry.address
+            (e) => e?.address === currentEntry.address
           );
           if (
             currentEntry.address === address &&

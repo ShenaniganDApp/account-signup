@@ -13,7 +13,7 @@ import { formatAddress } from '/helpers/utils';
 import { writeAddressbook } from '/helpers/github';
 
 export default function Home() {
-  const [addBookEntry, setAddBookEntry] = useState({});
+  const [addBookEntry, setAddBookEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [githubUsername, setGithubUsername] = useState('');
   const [updateSuccessfull, setUpdateSuccessful] = useState(false);
@@ -32,8 +32,8 @@ export default function Home() {
   const onSubmit = async (e) => {
     e.preventDefault();
     const newEntry = {
-      name: session.user.name,
-      discordId: session.user.id,
+      name: session?.user?.name,
+      discordId: session?.user?.id,
       address: signedAddress,
       githubUsername,
     };
@@ -41,7 +41,6 @@ export default function Home() {
       newEntry,
       addBookEntry
     );
-    console.log('newAddress: ', newAddress);
     newAddress && setAddBookEntry({ ...addBookEntry, address: newAddress });
     github && setAddBookEntry({ ...addBookEntry, github });
     setUpdateSuccessful(true);
@@ -87,7 +86,7 @@ export default function Home() {
 
   useEffect(() => {
     addressbook.find((addBookEntry) => {
-      session.user.id === addBookEntry.discordId
+      session?.user?.id === addBookEntry?.discordId
         ? setAddBookEntry(addBookEntry)
         : null;
     });
@@ -161,10 +160,10 @@ export default function Home() {
             <div className="w-full flex flex-row justify-center items-center">
               <div className="w-1/2 flex flex-col gap-5 justify-center items-start ml-10">
                 <AccountBanner src={'/assets/github.png'}>
-                  {addBookEntry.github ? addBookEntry.github : '❌ Not Linked'}
+                  {addBookEntry?.github ? addBookEntry.github : '❌ Not Linked'}
                 </AccountBanner>
                 <AccountBanner src={'/assets/ethereum.png'}>
-                  {addBookEntry.address
+                  {addBookEntry?.address
                     ? `${formatAddress(addBookEntry.address)}`
                     : '❌ Not Linked'}
                 </AccountBanner>
@@ -212,7 +211,7 @@ export default function Home() {
             >
               {updateSuccessfull
                 ? '✅'
-                : !!addBookEntry
+                : addBookEntry
                 ? 'Update Account'
                 : 'Sign Up'}
             </button>
