@@ -1,38 +1,41 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import styles from '/styles/Home.module.css';
-import { GithubLoginButton } from 'react-social-login-buttons';
-import CornerTriangle from '/components/UI/CornerTriangle';
 import AccountBanner from '/components/UI/AccountBanner';
-import { MobileWarning } from '/components/UI/MobileWarning';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import useAddressbook from '/hooks/useAddressbook';
 import { useEffect, useState } from 'react';
-import useWeb3Modal from '/hooks/useWeb3Modal';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { formatAddress } from '/helpers/utils';
 import { writeAddressbook } from '/helpers/github';
 import { GithubSign } from '../components/Github';
 import { EthereumSign } from '../components/Ethereum';
 import { ProgressBar } from '../components/UI/ProgressBar';
 import { emojisplosions } from 'emojisplosion';
+import { useAccount, useSignMessage } from 'wagmi';
+import { verifyMessage } from 'ethers/lib/utils';
 
 export default function Home() {
   const [addBookEntry, setAddBookEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [githubUsername, setGithubUsername] = useState('');
   const [updateSuccessfull, setUpdateSuccessful] = useState(false);
-  const [signature, setSignature] = useState('');
-  const [signedAddress, setSignedAddress] = useState('');
   const [index, setIndex] = useState(0);
 
-  const { connect, address, web3Provider } = useWeb3Modal();
+  // const { connect, address, web3Provider } = useWeb3Modal();
+  const [{ data: account, error, loading }, disconnect] = useAccount();
   const { data: session, status } = useSession({ required: true });
   const { addressbook } = useAddressbook();
+  const [{ data: signature }, signMessage] = useSignMessage({
+    message: `I own this address: ${account?.address}`,
+  });
 
-  //check if screen width is less than 550px
-  const isMobile = window.innerWidth < 550;
+  const isVerifiedAddress =
+    signature &&
+    verifyMessage(`I own this address: ${account?.address}`, signature) ===
+      account?.address;
 
-  const canSubmit = (signedAddress && signature) || githubUsername;
+  const canSubmit = (signature && isVerifiedAddress) || githubUsername;
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -102,18 +105,6 @@ export default function Home() {
     });
   }, [session, addressbook]);
 
-  //use web3Provider to sign a message that will confirm the user owns the address
-  const signMessage = async () => {
-    const signer = web3Provider.getSigner();
-    const message = `I own this address: ${address}`;
-    const signature = await signer.signMessage(message);
-    const signerAddress = await signer.getAddress();
-    setSignedAddress(signerAddress);
-    setSignature(signature);
-  };
-
-  // if (isMobile) return <MobileWarning />;
-
   const currentPage = (i) => {
     switch (i) {
       case 0:
@@ -134,9 +125,9 @@ export default function Home() {
                 : '❌ Not Linked'}
             </AccountBanner>
             <EthereumSign
-              address={address}
-              signedAddress={signedAddress}
-              connect={connect}
+              address={account?.address}
+              signature={signature}
+              isVerifiedAddress={isVerifiedAddress}
               signMessage={signMessage}
             />
           </div>
@@ -159,10 +150,12 @@ export default function Home() {
 
       <div
         className={
-          'py-10 flex flex-col lg:flex-row justify-around items-center gap-3'
+          'py-10 flex flex-col lg:flex-row justify-around items-center gap-5'
         }
       >
-        <div className="flex row justify-center items-center gap-3">
+        <ConnectButton />
+
+        <div className="flex row justify-center items-center gap-3 ">
           <Image
             className="rounded-full"
             src={session.user.image}
@@ -188,7 +181,7 @@ export default function Home() {
       </div>
 
       <main
-        className={`${styles.main} bg-glass-white border-glass-border border-2 border-solid rounded-lg justify-center items-center lg:mx-8 md:mx-0 `}
+        className={`${styles.main} bg-glass-white border-glass-border border-2 border-solid rounded-lg justify-center items-center lg:mx-8 md:mx-0 py-8 `}
       >
         {!session.hasBrightId && (
           <div className="flex flex-col justify-center items-center ">
@@ -230,17 +223,6 @@ export default function Home() {
                 ? 'Update Account'
                 : 'Sign Up'}
             </button>
-
-            <a
-              href="https://she.energy"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Connected by SHE
-              {/* <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span> */}
-            </a>
           </>
         )}
       </main>
