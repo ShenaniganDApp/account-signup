@@ -11,6 +11,10 @@ import { useEffect, useState } from 'react';
 import useWeb3Modal from '/hooks/useWeb3Modal';
 import { formatAddress } from '/helpers/utils';
 import { writeAddressbook } from '/helpers/github';
+import { GithubSign } from '../components/Github';
+import { EthereumSign } from '../components/Ethereum';
+import { ProgressBar } from '../components/UI/ProgressBar';
+import { emojisplosions } from 'emojisplosion';
 
 export default function Home() {
   const [addBookEntry, setAddBookEntry] = useState(null);
@@ -19,6 +23,7 @@ export default function Home() {
   const [updateSuccessfull, setUpdateSuccessful] = useState(false);
   const [signature, setSignature] = useState('');
   const [signedAddress, setSignedAddress] = useState('');
+  const [index, setIndex] = useState(0);
 
   const { connect, address, web3Provider } = useWeb3Modal();
   const { data: session, status } = useSession({ required: true });
@@ -44,6 +49,9 @@ export default function Home() {
     newAddress && setAddBookEntry({ ...addBookEntry, address: newAddress });
     github && setAddBookEntry({ ...addBookEntry, github });
     setUpdateSuccessful(true);
+    emojisplosions({
+      emojis: ['✅'],
+    });
   };
 
   const brightIDMessage = session.hasBrightId
@@ -76,6 +84,8 @@ export default function Home() {
 
           login && setGithubUsername('@' + login);
           setIsLoading(false);
+          13;
+          setIndex(1);
         } catch (error) {
           setIsLoading(false);
         }
@@ -102,12 +112,42 @@ export default function Home() {
     setSignature(signature);
   };
 
-  if (isMobile) return <MobileWarning />;
+  // if (isMobile) return <MobileWarning />;
+
+  const currentPage = (i) => {
+    switch (i) {
+      case 0:
+        return (
+          <div className="w-1/2 flex flex-col gap-5 justify-center items-center p-5">
+            <AccountBanner src={'/assets/github.png'}>
+              {addBookEntry?.github ? addBookEntry.github : '❌ Not Linked'}
+            </AccountBanner>
+            <GithubSign githubUsername={githubUsername} />
+          </div>
+        );
+      case 1:
+        return (
+          <div className="w-1/2 flex flex-col gap-5 justify-center items-center p-5">
+            <AccountBanner src={'/assets/ethereum.png'}>
+              {addBookEntry?.address
+                ? `${formatAddress(addBookEntry.address)}`
+                : '❌ Not Linked'}
+            </AccountBanner>
+            <EthereumSign
+              address={address}
+              signedAddress={signedAddress}
+              connect={connect}
+              signMessage={signMessage}
+            />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className={styles.container}>
-      <CornerTriangle origin="origin-top-right" corner={'top-0 left-0'} />
-      <CornerTriangle origin="origin-bottom-left" corner={'bottom-0 right-0'} />
+    <div className={`${styles.container} justify-around`}>
       <Head>
         <title>Scoreboard Signup</title>
         <meta
@@ -117,30 +157,42 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={`${styles.main} bg-white`}>
-        <div className="absolute top-10 flex row justify-around items-center w-60	">
+      <div
+        className={
+          'py-10 flex flex-col lg:flex-row justify-around items-center gap-3'
+        }
+      >
+        <div className="flex row justify-center items-center gap-3">
           <Image
-            className=" rounded-full"
+            className="rounded-full"
             src={session.user.image}
             width={100}
             height={100}
           />
-          <h1 className="text-3xl">{session.user.name}</h1>
+          <h1 className="text-3xl font-title text-white">
+            {session.user.name}
+          </h1>
         </div>
-
         <div className="flex row justify-center items-center">
-          <Image
+          {/* <Image
             src={'/assets/brightid.jpeg'}
             className="rounded-full"
             width={75}
             height={75}
-          />
+          /> */}
 
-          <p className="text-2xl w-80 text-center">{brightIDMessage}</p>
+          <p className="text-2xl w-80 text-center text-white font-title">
+            {brightIDMessage}
+          </p>
         </div>
+      </div>
+
+      <main
+        className={`${styles.main} bg-glass-white border-glass-border border-2 border-solid rounded-lg justify-center items-center lg:mx-8 md:mx-0 `}
+      >
         {!session.hasBrightId && (
           <div className="flex flex-col justify-center items-center ">
-            <p className="text-large">
+            <p className="text-large font-title text-dark-title">
               You Must Link Your BrightID account via the Discord Bot
             </p>
             <a
@@ -148,7 +200,7 @@ export default function Home() {
               target={'_blank'}
               rel="noreferrer"
             >
-              <button className="shadow-md m-20 w-60 text-white p-2 text-xl font-bold bg-discord rounded">
+              <button className="shadow-md m-20 w-60 text-dark-title font-title p-2 text-xl font-bold bg-discord rounded">
                 Back to Discord
               </button>
             </a>
@@ -157,60 +209,23 @@ export default function Home() {
 
         {session.hasBrightId && (
           <>
-            <div className="w-full flex flex-row justify-center items-center">
-              <div className="w-1/2 flex flex-col gap-5 justify-center items-start ml-10">
-                <AccountBanner src={'/assets/github.png'}>
-                  {addBookEntry?.github ? addBookEntry.github : '❌ Not Linked'}
-                </AccountBanner>
-                <AccountBanner src={'/assets/ethereum.png'}>
-                  {addBookEntry?.address
-                    ? `${formatAddress(addBookEntry.address)}`
-                    : '❌ Not Linked'}
-                </AccountBanner>
-              </div>
+            <ProgressBar
+              progressLabels={['Github', 'Ethereum']}
+              setIndex={setIndex}
+              index={index}
+            />
 
-              <div className="w-1/2 flex flex-col gap-5 flex-row justify-center items-center">
-                <div className="w-60 p-2">
-                  {githubUsername ? (
-                    <GithubLoginButton
-                      className="m-0"
-                      text={`${githubUsername}`}
-                      align="center"
-                    />
-                  ) : (
-                    <a
-                      href={`https://github.com/login/oauth/authorize?scope=user&client_id=${process.env.GITHUB_CLIENT_ID}`}
-                    >
-                      <GithubLoginButton
-                        className="m-0 text-center"
-                        text="Link Github"
-                        align="center"
-                      />
-                    </a>
-                  )}
-                </div>
-                <div className="flex justify-center w-60 p-2">
-                  <button
-                    className=" w-[calc(100%-10px)] h-12 px-3.5 text-white p-2 text-xl  bg-cornflowerblue rounded shadow-md"
-                    onClick={address ? signMessage : connect}
-                  >
-                    {signature
-                      ? `✅ ${formatAddress(signedAddress)}`
-                      : address
-                      ? `Link ${formatAddress(address)}`
-                      : 'Connect Ethereum'}
-                  </button>
-                </div>
-              </div>
+            <div className="w-full flex flex-row justify-center items-center">
+              {currentPage(index)}
             </div>
 
             <button
-              className={`shadow-md disabled:bg-slate-200 absolute bottom-10 w-60 text-white p-2 text-xl font-bold bg-she-pink rounded`}
+              className={`shadow-md disabled:bg-darkpurple absolute bottom-10 w-60 text-white font-button p-2 text-xl font-bold bg-she-pink rounded`}
               disabled={!canSubmit}
               onClick={onSubmit}
             >
               {updateSuccessfull
-                ? '✅'
+                ? '✅ Successfully Updated'
                 : addBookEntry
                 ? 'Update Account'
                 : 'Sign Up'}

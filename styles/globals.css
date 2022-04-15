@@ -7,9 +7,10 @@ html,
 body {
   padding: 0;
   margin: 0;
-  background-color: DarkGray;
+  height:100%;
+  background: linear-gradient(192.04deg, #03B3FF 0%, #38234A 22.92%, #DF2D71 56.25%, #FB7429 100%);;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif, Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 }
 
 a {
