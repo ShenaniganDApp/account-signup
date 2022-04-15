@@ -1,18 +1,30 @@
-import { useSession } from "next-auth/react"
-
-
+import { useSession } from 'next-auth/react';
+import Lottie from 'react-lottie';
+import animationData from '/lotties/loading.json';
 function Auth({ children }) {
-  const { data: session, status } = useSession({required: true})
-  const isUser = !!session?.user
-
+  const { data: session, status } = useSession({ required: true });
+  const isUser = !!session?.user;
 
   if (isUser) {
-    return children
+    return children;
   }
 
   // Session is being fetched, or no user.
   // If no user, useEffect() will redirect.
-  return <div>Loading...</div>
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: 'xMidYMid slice',
+    },
+  };
+
+  return (
+    <div>
+      <Lottie options={defaultOptions} height={400} width={400} />
+    </div>
+  );
 }
 
-export default Auth
+export default Auth;

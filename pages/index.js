@@ -211,21 +211,22 @@ export default function Home() {
             <div className="w-full flex flex-row justify-center items-center">
               {currentPage(index)}
             </div>
-
-            <button
-              className={`shadow-md disabled:bg-darkpurple absolute bottom-10 w-60 text-white font-button p-2 text-xl font-bold bg-she-pink rounded`}
-              disabled={!canSubmit}
-              onClick={onSubmit}
-            >
-              {updateSuccessfull
-                ? '✅ Successfully Updated'
-                : addBookEntry
-                ? 'Update Account'
-                : 'Sign Up'}
-            </button>
           </>
         )}
       </main>
+      <div className="flex justify-center mt-10 mb-10 items-end">
+        <button
+          className={`shadow-md disabled:bg-darkpurple w-60 mt-auto text-white font-button p-2 text-xl font-bold bg-she-pink rounded`}
+          disabled={!canSubmit}
+          onClick={onSubmit}
+        >
+          {updateSuccessfull
+            ? '✅ Successfully Updated'
+            : addBookEntry
+            ? 'Update Account'
+            : 'Sign Up'}
+        </button>
+      </div>
     </div>
   );
 }
