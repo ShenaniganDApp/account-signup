@@ -23,8 +23,8 @@ export default function Home() {
   const [index, setIndex] = useState(0);
 
   // const { connect, address, web3Provider } = useWeb3Modal();
-  const [{ data: account, error, loading }, disconnect] = useAccount();
-  const { data: session, status } = useSession({ required: true });
+  const [{ data: account }] = useAccount();
+  const { data: session } = useSession({ required: true });
   const { addressbook } = useAddressbook();
   const [{ data: signature }, signMessage] = useSignMessage({
     message: `I own this address: ${account?.address}`,
@@ -42,7 +42,7 @@ export default function Home() {
     const newEntry = {
       name: session?.user?.name,
       discordId: session?.user?.id,
-      address: signedAddress,
+      address: isVerifiedAddress,
       githubUsername,
     };
     const { address: newAddress, github } = writeAddressbook(
