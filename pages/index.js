@@ -42,7 +42,7 @@ export default function Home() {
     const newEntry = {
       name: session?.user?.name,
       discordId: session?.user?.id,
-      address: isVerifiedAddress,
+      address: account?.address,
       githubUsername,
     };
     const { address: newAddress, github } = writeAddressbook(
@@ -50,11 +50,15 @@ export default function Home() {
       addBookEntry
     );
     newAddress && setAddBookEntry({ ...addBookEntry, address: newAddress });
-    github && setAddBookEntry({ ...addBookEntry, github });
-    setUpdateSuccessful(true);
-    emojisplosions({
-      emojis: ['✅'],
-    });
+    newAddress && github && setAddBookEntry({ ...addBookEntry, github });
+    newAddress && setUpdateSuccessful(true);
+    newAddress
+      ? emojisplosions({
+          emojis: ['✅'],
+        })
+      : emojisplosions({
+          emojis: ['❌'],
+        });
   };
 
   const brightIDMessage = session.hasBrightId
