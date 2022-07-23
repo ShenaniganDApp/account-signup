@@ -35,7 +35,7 @@ export default function Home() {
     verifyMessage(`I own this address: ${account?.address}`, signature) ===
       account?.address;
 
-  const canSubmit = (signature && isVerifiedAddress) || githubUsername;
+  const canSubmit = signature && isVerifiedAddress && githubUsername;
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -56,9 +56,7 @@ export default function Home() {
       ? emojisplosions({
           emojis: ['✅'],
         })
-      : emojisplosions({
-          emojis: ['❌'],
-        });
+      : alert('Somethin went wrong.');
   };
 
   const brightIDMessage = session.hasBrightId
